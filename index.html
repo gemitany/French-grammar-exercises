@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>French GCSE Grammar – Lower Shell</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#1d2433;--mute:#667;--pri:#2b5cd6;--ok:#1a8a4a;--bad:#c62f3b}
+@media(prefers-color-scheme:dark){:root{--bg:#12151c;--card:#1b2030;--ink:#e8ebf4;--mute:#9aa3b8;--pri:#7fa2ff;--ok:#4cc27f;--bad:#ff7b86}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+main{max-width:760px;margin:0 auto;padding:18px 14px 60px}
+h1{font-size:1.5em;margin:.3em 0}h2{font-size:1.2em;margin:.3em 0}h3{font-size:1em;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin:22px 0 4px}
+.card{background:var(--card);border-radius:12px;padding:16px;margin:10px 0;box-shadow:0 1px 3px #0003}
+button{font:inherit;background:var(--pri);color:var(--bg);border:0;border-radius:8px;padding:8px 16px;cursor:pointer}
+button.alt{background:transparent;color:var(--pri);border:1px solid var(--pri)}
+input[type=text]{font:inherit;padding:5px 8px;border:1px solid var(--mute);border-radius:6px;background:var(--bg);color:var(--ink);width:11em;max-width:100%}
+input.sm{width:6.5em}
+.q{margin:14px 0}.q input{margin:0 4px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.tip{background:var(--bg);border-left:4px solid var(--pri);padding:8px 12px;border-radius:6px;margin-top:6px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* ============ SETTINGS ============ */
+const CONFIG = {
+  ENDPOINT: "",          // paste your Google Apps Script web-app URL here (see README.docx)
+  PASS: 70,              // % needed in a section to avoid the extra exercises
+  STRICT_ACCENTS: false  // true = missing/wrong accents are marked wrong
+};
+
+/* ============ QUESTIONS ============
+   "sentence with ___ gap|answer/alternative answer"   (several gaps: "…___…___…|first;second")
+   Each section: main (15 for verb tenses, 8 otherwise) + extra (8 / 5), given if main is below PASS. */
+const SECTIONS = [
+{id:"gender", grp:"Nouns, articles & adjectives", title:"1. Nouns: le or la?",
+ ins:"Type <b>le</b> or <b>la</b>.",
+ tip:"Learn each noun with le/la. Usually masculine: -age, -ment, -eau, -isme, -oir, -eil, -et, -ier, -ail. Usually feminine: -tion, -sion, -té, -ure, -ette, -ence, -ance, -esse, -ie, -ée, -ine, -ise, -tude. Exceptions: <i>le silence, le musée, l'été, le magazine</i>.",
+ main:[
+  "___ courage est essentiel.|le",
+  "___ beauté est importante.|la",
+  "___ bâtiment est impressionnant.|le",
+  "___ château est grand.|le",
+  "___ pollution est un grand problème.|la",
+  "___ racisme est inacceptable.|le",
+  "___ télescope est super.|le",
+  "___ nature est belle.|la"],
+ extra:[
+  "___ fromage est délicieux.|le",
+  "___ situation est grave.|la",
+  "___ voyage était long.|le",
+  "___ vitesse est limitée.|la",
+  "___ mouvement est rapide.|le"]},
+
+{id:"plural", grp:"Nouns, articles & adjectives", title:"2. Plural nouns",
+ ins:"Write the plural: <b>article + noun</b> (e.g. <i>les chats</i>).",
+ tip:"Add a silent -s. <b>-al → -aux</b>, <b>-eau / -eu → -eaux / -eux</b>, <b>-ail → -aux</b> (travail), a few <b>-ou → -oux</b> (bijou). Nouns already ending in <b>-s, -x, -z</b> don't change (un choix → des choix). le / la / l' → <b>les</b>.",
+ main:[
+  "J'aime ___. (le cheval)|les chevaux",
+  "Elle aime ___. (le bijou)|les bijoux",
+  "Je n'aime pas ___. (le choix)|les choix",
+  "Il déteste ___ difficiles. (le cours)|les cours",
+  "Nous visitons ___. (l'hôpital)|les hôpitaux",
+  "Il aime ___. (le tableau)|les tableaux",
+  "Ils aiment ___. (le jeu)|les jeux",
+  "Elle adore ___ américains. (le campus)|les campus"],
+ extra:[
+  "Elle lit ___. (le journal)|les journaux",
+  "Nous cherchons ___. (le bureau)|les bureaux",
+  "Il regarde ___. (l'animal)|les animaux",
+  "Nous visitons ___. (le château)|les châteaux",
+  "Elle compare ___. (le prix)|les prix"]},
+
+{id:"articles", grp:"Nouns, articles & adjectives", title:"3. Articles: a / the",
+ ins:"Type <b>un, une, des, le, la, l'</b> or <b>les</b>.",
+ tip:"a / some: <b>un</b> (m), <b>une</b> (f), <b>des</b> (plural). the: <b>le</b> (m), <b>la</b> (f), <b>l'</b> (before a vowel or silent h), <b>les</b> (plural).",
+ main:[
+  "Je voudrais ___ café.|un",
+  "Léa est ___ fille sympa.|une",
+  "Ils sont ___ amis.|des",
+  "Elle est ___ étudiante.|une",
+  "J'adore ___ musique.|la",
+  "Il déteste ___ professeur de maths.|le",
+  "J'adore ___ odeur du pain.|l'",
+  "___ hommes sont fatigués.|les"],
+ extra:[
+  "C'est ___ film intéressant.|un",
+  "J'ai ___ sœur et deux frères.|une",
+  "Voici ___ affiche de Paris.|l'",
+  "Ce sont ___ garçons sympas.|des",
+  "___ université est grande.|l'"]},
+
+{id:"ade", grp:"Nouns, articles & adjectives", title:"4. à / de + the (au, du, des…)",
+ ins:"Write the missing word(s), e.g. <i>au</i> or <i>de la</i>.",
+ tip:"à / de + <b>le</b> → <b>au / du</b>; + <b>les</b> → <b>aux / des</b>; + <b>la</b> → <b>à la / de la</b>; + vowel → <b>à l' / de l'</b>. After a negative (not any) use just <b>de</b>: <i>Je n'ai pas de pommes</i>.",
+ main:[
+  "Je vais ___ café. (à + le)|au",
+  "Il parle ___ vacances. (de + les)|des",
+  "Elle passe des heures ___ bibliothèque. (à + la)|à la",
+  "Nous habitons près ___ université. (de + l')|de l'",
+  "Tu veux ___ pain ? (some)|du",
+  "Je voudrais ___ soupe. (some)|de la",
+  "Elle ne mange pas ___ viande. (not any)|de",
+  "Il joue ___ football. (à + le)|au"],
+ extra:[
+  "Nous rentrons ___ école. (à + l')|à l'",
+  "Je vais ___ restaurant. (à + le)|au",
+  "Elle mange ___ glace. (some)|de la",
+  "Il n'y a pas ___ lait. (not any)|de",
+  "C'est le livre ___ enfants. (de + les)|des"]},
+
+{id:"adj", grp:"Nouns, articles & adjectives", title:"5. Adjective agreement",
+ ins:"Write the adjective in brackets in the correct form.",
+ tip:"Feminine: +e. Plural: +s. <b>-x → -se</b> (heureuse); <b>-f → -ve</b> (neuve); <b>-er → -ère</b>; <b>-eur → -euse</b>; <b>-on/-en/-el/-il</b> double the consonant + e (bon → bonne); <b>-c → -che</b> (blanche). Before a vowel: <b>bel, nouvel, vieil</b>. Irregular: beau/belle, nouveau/nouvelle, vieux/vieille, fou/folle.",
+ main:[
+  "Cette lampe est très ___ (beau).|belle",
+  "Ma sœur est ___ (fou).|folle",
+  "Mon prof est un ___ (vieux) homme.|vieil",
+  "C'est ma ___ (premier) fois à Paris.|première",
+  "J'ai acheté une ___ (nouveau) voiture.|nouvelle",
+  "Mes ___ (dernier) vacances étaient super.|dernières",
+  "Elle est vraiment ___ (heureux).|heureuse",
+  "Mes sœurs sont ___ (sportif).|sportives"],
+ extra:[
+  "Ils sont très ___ (gentil).|gentils",
+  "Les ___ (nouveau) élèves sont sympas.|nouveaux",
+  "Ces filles sont ___ (mignon).|mignonnes",
+  "Elle a un ___ (beau) appartement.|bel",
+  "Elle porte une jupe ___ (blanc).|blanche"]},
+
+{id:"poss", grp:"Nouns, articles & adjectives", title:"6. Possessive adjectives & pronouns",
+ ins:"Write the French word(s) for the English in brackets.",
+ tip:"<b>my</b> mon/ma/mes · <b>your</b> ton/ta/tes · <b>his/her</b> son/sa/ses · <b>our</b> notre/nos · <b>your (pl)</b> votre/vos · <b>their</b> leur/leurs. The word agrees with the <b>thing owned</b>, not the owner. ma/ta/sa → <b>mon/ton/son</b> before a vowel (mon amie). Pronouns: le mien, la mienne, les miens, les miennes · le tien… · le sien… · le/la/les nôtre(s) · le/la/les vôtre(s) · le/la leur, les leurs.",
+ main:[
+  "___ sœur s'appelle Emma. (my)|ma",
+  "___ amie est très sympa. (my)|mon",
+  "Où sont ___ livres ? (your – tu)|tes",
+  "Marc adore ___ mère. (his)|sa",
+  "Sophie adore ___ père. (her)|son",
+  "Nous aimons ___ école. (our)|notre",
+  "Voilà ma voiture et voici ___. (yours – vous)|la vôtre",
+  "Ce stylo est à moi. C'est ___. (mine)|le mien"],
+ extra:[
+  "Vous avez ___ clés ? (your – vous)|vos",
+  "Mes voisins aiment ___ chiens. (their)|leurs",
+  "Ce sont tes chaussures ? Oui, ce sont ___. (mine)|les miennes",
+  "Ma maison est grande, mais ___ est petite. (yours – tu)|la tienne",
+  "Voici nos billets et voilà ___. (theirs)|les leurs"]},
+
+{id:"pres", grp:"Verb tenses", title:"7. Present tense: regular verbs",
+ ins:"Write the correct present-tense form of the verb.",
+ tip:"Remove -er / -ir / -re and add: <b>-ER</b> e, es, e, ons, ez, ent · <b>-IR</b> is, is, it, issons, issez, issent · <b>-RE</b> s, s, (nothing), ons, ez, <b>ent</b>. Spelling changes: acheter → j'achète; préférer → je préfère; appeler → j'appelle; manger → nous mangeons; commencer → nous commençons.",
+ main:[
+  "Nous ___ (étudier) le français.|étudions",
+  "Vous ___ (vendre) une maison ?|vendez",
+  "Tu ___ (acheter) le journal.|achètes",
+  "Ils ___ (finir) leurs devoirs.|finissent",
+  "Elles ___ (appeler) leurs parents.|appellent",
+  "Je ___ (choisir) le français.|choisis",
+  "Ils ___ (vendre) leurs livres.|vendent",
+  "Elle ___ (rougir) souvent.|rougit",
+  "Nous ___ (manger) à la cantine.|mangeons",
+  "J'___ (habiter) à Londres.|habite",
+  "Tu ___ (répondre) à la question.|réponds",
+  "Vous ___ (réussir) toujours.|réussissez",
+  "Il ___ (préférer) le rugby.|préfère",
+  "Nous ___ (commencer) à huit heures.|commençons",
+  "Elles ___ (attendre) le bus.|attendent"],
+ extra:[
+  "Je ___ (manger) une pomme.|mange",
+  "Tu ___ (finir) tôt.|finis",
+  "Il ___ (répondre) au prof.|répond",
+  "Vous ___ (parler) français.|parlez",
+  "Nous ___ (choisir) un film.|choisissons",
+  "Elle ___ (jouer) au tennis.|joue",
+  "Ils ___ (perdre) souvent.|perdent",
+  "Je ___ (payer) en espèces.|paie/paye"]},
+
+{id:"irr", grp:"Verb tenses", title:"8. Present tense: irregular verbs",
+ ins:"Write the correct present-tense form of the verb.",
+ tip:"être: suis, es, est, sommes, êtes, sont · avoir: ai, as, a, avons, avez, ont · aller: vais, vas, va, allons, allez, vont · faire: fais, fais, fait, faisons, faites, font · vouloir: veux, veux, veut, voulons, voulez, veulent · pouvoir: peux, peux, peut, pouvons, pouvez, peuvent · devoir: dois, dois, doit, devons, devez, doivent.",
+ main:[
+  "Nous ___ (être) contents.|sommes",
+  "Tu ___ (avoir) un chien.|as",
+  "Je ___ (aller) au collège.|vais",
+  "Ils ___ (faire) leurs devoirs.|font",
+  "Vous ___ (être) en retard.|êtes",
+  "Elle ___ (vouloir) un thé.|veut",
+  "Nous ___ (pouvoir) venir.|pouvons",
+  "Ils ___ (devoir) partir.|doivent",
+  "Je ___ (être) très fatigué.|suis",
+  "Elle ___ (avoir) douze ans.|a",
+  "Nous ___ (aller) en ville.|allons",
+  "Vous ___ (faire) du sport ?|faites",
+  "Tu ___ (vouloir) venir ?|veux",
+  "Je ___ (pouvoir) t'aider.|peux",
+  "Il ___ (devoir) travailler.|doit"],
+ extra:[
+  "Ils ___ (aller) en ville.|vont",
+  "Tu ___ (pouvoir) m'aider ?|peux",
+  "Ils ___ (avoir) faim.|ont",
+  "Elles ___ (être) sympas.|sont",
+  "Nous ___ (vouloir) partir.|voulons",
+  "Je ___ (devoir) rentrer.|dois",
+  "Ils ___ (pouvoir) venir.|peuvent",
+  "Tu ___ (faire) quoi ?|fais"]},
+
+{id:"pc", grp:"Verb tenses", title:"9. Perfect tense (passé composé)",
+ ins:"Write the <b>auxiliary + past participle</b> (e.g. <i>ai chanté</i>). Reflexive verbs: include the pronoun where it is not already shown.",
+ tip:"avoir or être (present) + past participle. -er → é, -ir → i, -re → u. Irregular: avoir eu, être été, faire fait, prendre pris, mettre mis, boire bu, voir vu, écrire écrit. <b>être</b> verbs (MRS VAN DER TRAMP + reflexives) agree with the subject: <i>elle est partie, ils sont partis</i>.",
+ main:[
+  "J'___ (chanter) hier soir.|ai chanté",
+  "Nous ___ (vendre) la voiture.|avons vendu",
+  "Tu ___ (finir) tes devoirs.|as fini",
+  "Ils ___ (boire) du thé.|ont bu",
+  "Elle ___ (faire) ses devoirs.|a fait",
+  "Il ___ (aller) au cinéma.|est allé",
+  "Elles ___ (partir) hier.|sont parties",
+  "Je ___ (se laver) ce matin. [girl]|me suis lavée",
+  "Vous ___ (prendre) le train.|avez pris",
+  "Ma sœur ___ (naître) en mai.|est née",
+  "Mes parents ___ (rentrer) tard.|sont rentrés",
+  "Nous ___ (voir) un film.|avons vu",
+  "Elle ___ (mettre) son manteau.|a mis",
+  "Tu ___ (rester) à la maison ? [boy]|es resté",
+  "Ils ___ (se lever) à sept heures.|se sont levés"],
+ extra:[
+  "Nous ___ (prendre) le bus.|avons pris",
+  "Il ___ (mourir) en 1990.|est mort",
+  "Ils ___ (voir) le film.|ont vu",
+  "Mes amis ___ (rester) à la maison.|sont restés",
+  "Il ___ (écrire) un poème.|a écrit",
+  "Vous ___ (arriver) à quelle heure ? [girls]|êtes arrivées",
+  "Je ___ (lire) un livre.|ai lu",
+  "Les garçons ___ (se coucher) tard.|se sont couchés"]},
+
+{id:"fut", grp:"Verb tenses", title:"10. Future tenses",
+ ins:"Write the verb in the tense shown in brackets.",
+ tip:"Near future: <b>aller</b> (present) + infinitive. Future: infinitive (-re loses its e) + <b>ai, as, a, ons, ez, ont</b>. Irregular stems: être ser-, avoir aur-, aller ir-, faire fer-, pouvoir pourr-, voir verr-, venir viendr-, vouloir voudr-. Spelling: appeler → j'appellerai, acheter → j'achèterai.",
+ main:[
+  "Je ___ (near future: sortir) ce soir.|vais sortir",
+  "Nous ___ (near future: jouer) au foot.|allons jouer",
+  "Ils ___ (near future: manger) au restaurant.|vont manger",
+  "Tu ___ (future: finir) tes devoirs.|finiras",
+  "Je ___ (future: vendre) ma bicyclette.|vendrai",
+  "Elle ___ (future: être) contente.|sera",
+  "Nous ___ (future: avoir) un chien.|aurons",
+  "Il ___ (future: faire) beau.|fera",
+  "Vous ___ (near future: voir) le musée.|allez voir",
+  "Elles ___ (future: aller) en France.|iront",
+  "Je ___ (future: pouvoir) venir.|pourrai",
+  "Tu ___ (future: voir) tes amis.|verras",
+  "Nous ___ (future: manger) à midi.|mangerons",
+  "Il ___ (future: venir) demain.|viendra",
+  "Vous ___ (future: vouloir) partir.|voudrez"],
+ extra:[
+  "J'___ (future: aller) en France.|irai",
+  "Ils ___ (future: voir) le match.|verront",
+  "Elle ___ (future: pouvoir) nous aider.|pourra",
+  "Nous ___ (near future: parler) au prof.|allons parler",
+  "Tu ___ (future: venir) demain ?|viendras",
+  "Je ___ (future: avoir) quinze ans.|aurai",
+  "Vous ___ (future: être) contents.|serez",
+  "Elles ___ (near future: faire) du shopping.|vont faire"]},
+
+{id:"imp", grp:"Verb tenses", title:"11. Imperfect tense",
+ ins:"Write the imperfect form of the verb.",
+ tip:"Take the <b>nous</b> form of the present, remove -ons, add <b>ais, ais, ait, ions, iez, aient</b>. Exception: être → stem <b>ét-</b> (j'étais, tu étais, il était, nous étions, vous étiez, ils étaient). Use it for descriptions and for what <i>used to</i> happen or <i>was</i> happening.",
+ main:[
+  "Quand j'étais petit, je ___ (jouer) dehors.|jouais",
+  "Nous ___ (choisir) toujours la même chose.|choisissions",
+  "Il ___ (être) fatigué.|était",
+  "Tu ___ (être) content.|étais",
+  "Elles ___ (chercher) leurs clés.|cherchaient",
+  "Vous ___ (oublier) tout.|oubliiez",
+  "Il ___ (pleuvoir) tous les jours.|pleuvait",
+  "J'___ (avoir) un chat.|avais",
+  "Nous ___ (manger) souvent au restaurant.|mangions",
+  "Ils ___ (finir) à quatre heures.|finissaient",
+  "Elle ___ (prendre) le bus.|prenait",
+  "Je ___ (faire) du sport le samedi.|faisais",
+  "Vous ___ (aller) à la plage.|alliez",
+  "Nous ___ (commencer) à neuf heures.|commencions",
+  "Tu ___ (lire) beaucoup.|lisais"],
+ extra:[
+  "Nous ___ (regarder) la télé.|regardions",
+  "Elles ___ (grandir) vite.|grandissaient",
+  "Tu ___ (parler) trop fort.|parlais",
+  "Vous ___ (être) petits.|étiez",
+  "Je ___ (sortir) le samedi.|sortais",
+  "Il ___ (faire) beau tous les jours.|faisait",
+  "Nous ___ (avoir) un chien.|avions",
+  "Ils ___ (être) contents.|étaient"]},
+
+{id:"cond", grp:"Verb tenses", title:"12. Conditional",
+ ins:"Write the conditional form of the verb.",
+ tip:"Future stem (infinitive; -re loses its e; same irregular stems as the future) + <b>ais, ais, ait, ions, iez, aient</b>. <b>Si-sentences:</b> si + imperfect → conditional (<i>Si j'avais le temps, je viendrais</i>).",
+ main:[
+  "Je ___ (parler) plus lentement.|parlerais",
+  "Tu ___ (choisir) le bleu.|choisirais",
+  "Il ___ (vendre) la maison.|vendrait",
+  "Nous ___ (vivre) à Paris.|vivrions",
+  "Vous ___ (demander) la carte.|demanderiez",
+  "Ils ___ (être) contents.|seraient",
+  "Je ___ (vouloir) un café.|voudrais",
+  "Elle ___ (faire) du sport.|ferait",
+  "Nous ___ (aller) au cinéma.|irions",
+  "Tu ___ (pouvoir) m'aider ?|pourrais",
+  "Ils ___ (avoir) plus de temps.|auraient",
+  "Je ___ (voir) mes amis.|verrais",
+  "Vous ___ (venir) avec nous ?|viendriez",
+  "Elle ___ (devoir) étudier.|devrait",
+  "Nous ___ (manger) plus de légumes.|mangerions"],
+ extra:[
+  "Nous ___ (regarder) un film.|regarderions",
+  "Tu ___ (avoir) le temps ?|aurais",
+  "Ils ___ (aller) en France.|iraient",
+  "Il ___ (pouvoir) venir.|pourrait",
+  "Vous ___ (voir) le musée.|verriez",
+  "Si j'avais de l'argent, je ___ (voyager) beaucoup.|voyagerais",
+  "Si tu étudiais, tu ___ (réussir).|réussirais",
+  "Si nous habitions à Paris, nous ___ (être) contents.|serions"]},
+
+{id:"neg", grp:"Pronouns & structures", title:"13. Negatives",
+ ins:"Fill each gap with the missing part of the negative (one word per box, e.g. <i>ne</i> and <i>pas</i>).",
+ tip:"<b>ne … pas</b> (not) · <b>ne … jamais</b> (never) · <b>ne … rien</b> (nothing) · <b>ne … personne</b> (nobody) · <b>ne … plus</b> (no longer) · <b>ne … que</b> (only) · <b>ne … ni … ni</b> (neither … nor). <b>ne → n'</b> before a vowel; ne goes before the verb, the second word after it. Perfect tense: ne + auxiliary + pas + participle (<i>Je n'ai pas mangé</i>).",
+ main:[
+  "Je ___ mange ___ de viande.|ne;pas",
+  "Il ___ aime ___ le chocolat.|n';pas",
+  "Elle ___ va ___ à la piscine. (never)|ne;jamais",
+  "Nous ___ avons ___ mangé. (nothing)|n';rien",
+  "Je ___ connais ___ ici. (nobody)|ne;personne",
+  "Il ___ joue ___ au tennis. (no longer)|ne;plus",
+  "Elle ___ est ___ allée en France. (never)|n';jamais",
+  "Ils ___ ont ___ de frères.|n';pas"],
+ extra:[
+  "Je ___ mange ___ des légumes. (only)|ne;que",
+  "Elle ___ boit ___ café ___ thé. (neither … nor)|ne;ni;ni",
+  "On ___ voit ___ dans la rue. (nobody)|ne;personne",
+  "Je ___ veux ___ sortir.|ne;pas",
+  "Il m'a dit de ___ courir. (not to)|ne pas"]},
+
+{id:"dop", grp:"Pronouns & structures", title:"14. Direct object pronouns",
+ ins:"Type the missing pronoun (le, la, l', les, me, te, nous, vous…).",
+ tip:"me (m') · te (t') · le / la (<b>l'</b> before a vowel) · nous · vous · les. It goes <b>before the verb</b>: before the auxiliary in the perfect tense, before the infinitive in <i>je vais le voir</i>. In the perfect tense the participle agrees with a preceding direct object: <i>Je l'ai achetée</i>.",
+ main:[
+  "Tu vois Marie ? Oui, je ___ vois.|la",
+  "Tu aimes ce film ? Oui, je ___ aime.|l'",
+  "Il regarde les enfants. Il ___ regarde.|les",
+  "Tu m'entends ? Oui, je ___ entends.|t'",
+  "Elle prend le bus. Elle ___ prend tous les jours.|le",
+  "Tu as vu Paul ? Oui, je ___ ai vu.|l'",
+  "Tu as acheté la robe ? Oui, je ___ ai achetée.|l'",
+  "Je vais ___ voir demain. (him)|le"],
+ extra:[
+  "Vous nous connaissez ? Oui, je ___ connais. (you – pl)|vous",
+  "Elle ne ___ voit pas. (me)|me",
+  "Où sont mes clés ? Je ne ___ trouve pas.|les",
+  "Il ne veut pas ___ inviter. (her)|l'",
+  "Tu as pris les billets ? Oui, je ___ ai pris.|les"]},
+
+{id:"iop", grp:"Pronouns & structures", title:"15. Indirect object pronouns",
+ ins:"Type the missing pronoun (lui, leur, me, te, nous, vous…).",
+ tip:"me (m') · te (t') · <b>lui</b> (to him / to her) · nous · vous · <b>leur</b> (to them). They replace <b>à + person</b>: parler à, dire à, donner à, écrire à, téléphoner à, répondre à, offrir à, envoyer à. No agreement in the perfect tense: <i>Je lui ai parlé</i>.",
+ main:[
+  "Tu parles à ta mère ? Oui, je ___ parle.|lui",
+  "Il téléphone à ses amis. Il ___ téléphone.|leur",
+  "Elle donne un cadeau à Paul. Elle ___ donne un cadeau.|lui",
+  "Tu m'écris ? Oui, je ___ écris.|t'",
+  "Tu nous téléphones ? Oui, je ___ téléphone. (you – pl)|vous",
+  "As-tu écrit à Marie ? Oui, je ___ ai écrit.|lui",
+  "Ils parlent à leurs profs. Ils ne ___ parlent pas.|leur",
+  "Mon père ___ a offert un vélo. (to me)|m'"],
+ extra:[
+  "Elle dit bonjour à ses voisins. Elle ___ dit bonjour.|leur",
+  "Je vais ___ envoyer un message. (to him)|lui",
+  "Il ne ___ répond jamais. (to me)|me",
+  "Qu'est-ce que tu ___ as dit ? (to them)|leur",
+  "Ma tante ___ donne de l'argent. (to us)|nous"]},
+
+{id:"y", grp:"Pronouns & structures", title:"16. The pronoun y",
+ ins:"Type the missing pronoun (y) and any small word needed.",
+ tip:"<b>y</b> replaces <b>à / dans / en / chez + a place or thing</b> (there). It goes before the verb: <i>Tu vas à Paris ? Oui, j'y vais.</i> <i>Je n'y vais pas. Nous y sommes allés. Allons-y !</i> It is not used for people (use lui / leur).",
+ main:[
+  "Tu vas à Paris ? Oui, j'___ vais.|y",
+  "Elle habite à Lyon. Elle ___ habite depuis dix ans.|y",
+  "Tu es allé au cinéma ? Oui, j'___ suis allé hier.|y",
+  "Nous allons à la plage. Nous ___ allons en août.|y",
+  "Il pense à son examen. Il ___ pense beaucoup.|y",
+  "Vous répondez à cette lettre ? Non, je n'___ réponds pas.|y",
+  "On va à la piscine ? Allons-___ !|y",
+  "Je ne vais pas à la fête. Je n'___ vais pas.|y"],
+ extra:[
+  "Tu es déjà allé en Espagne ? Non, je n'___ suis jamais allé.|y",
+  "Elle va au marché samedi. Elle ___ va tous les samedis.|y",
+  "Nous allons ___ aller demain. (there)|y",
+  "Tu joues au tennis ? Oui, j'___ joue.|y",
+  "Ils sont allés à Londres. Ils ___ sont allés en train.|y"]},
+
+{id:"en", grp:"Pronouns & structures", title:"17. The pronoun en",
+ ins:"Type the missing pronoun (en) and any small word needed.",
+ tip:"<b>en</b> replaces <b>du / de la / de l' / des / de + noun</b> (some, any, of it, of them, from there). It goes before the verb, and numbers stay after it: <i>J'ai deux frères → J'en ai deux.</i> <i>Je n'en ai pas.</i> <i>Il y en a beaucoup.</i>",
+ main:[
+  "Tu veux du pain ? Oui, j'___ veux.|en",
+  "Elle mange des pommes. Elle ___ mange tous les jours.|en",
+  "Tu as des frères ? Oui, j'___ ai deux.|en",
+  "Il boit du lait ? Non, il n'___ boit pas.|en",
+  "Vous avez de l'argent ? Oui, nous ___ avons.|en",
+  "Tu as acheté des livres ? Oui, j'___ ai acheté trois.|en",
+  "Tu veux des frites ? Oui, j'___ veux bien.|en",
+  "Il revient de Paris. Il ___ revient ce soir.|en"],
+ extra:[
+  "Elle a un chien ? Oui, elle ___ a un.|en",
+  "Des glaces ? Il y ___ a beaucoup ici.|en",
+  "Tu as besoin de mon stylo ? Oui, j'___ ai besoin.|en",
+  "Nous allons ___ acheter demain. (some)|en",
+  "Elle n'a pas de sœurs. Elle n'___ a pas.|en"]},
+
+{id:"refl", grp:"Pronouns & structures", title:"18. Reflexive pronouns & verbs",
+ ins:"Type the reflexive pronoun, or the whole verb form when a verb is in brackets.",
+ tip:"me (m') · te (t') · se (s') · nous · vous · se (s'). The pronoun goes before the verb and matches the subject: <i>je me lave, nous nous levons, elles s'amusent</i>. Before a vowel or silent h: <i>je m'habille, il s'appelle</i>. Negative: <i>Je ne me lave pas</i>. Some verbs change spelling: se promener → je me promène.",
+ main:[
+  "Je ___ lave tous les matins.|me",
+  "Tu ___ couches à quelle heure ?|te",
+  "Il ___ appelle Paul.|s'",
+  "Nous ___ levons à sept heures.|nous",
+  "Vous ___ habillez vite.|vous",
+  "Elles ___ dépêchent.|se",
+  "Je ___ (s'habiller) toujours vite.|m'habille",
+  "Elle ___ (se réveiller) à six heures.|se réveille"],
+ extra:[
+  "Ils ___ (s'amuser) bien au parc.|s'amusent",
+  "Tu ___ (se promener) le dimanche ?|te promènes",
+  "Nous ___ (se coucher) tôt.|nous couchons",
+  "Vous ___ (se disputer) souvent.|vous disputez",
+  "Il ne ___ (se lever) pas tôt.|se lève"]},
+
+{id:"conn", grp:"Pronouns & structures", title:"19. Connectives",
+ ins:"Type the French connective for the English in brackets.",
+ tip:"et (and) · mais (but) · ou (or) · donc / alors (so) · car / parce que (because) · quand (when) · pendant que (while) · si (if) · sinon (otherwise) · pourtant / cependant (however) · par contre (on the other hand) · d'abord, puis / ensuite, enfin (first, then, finally).",
+ main:[
+  "J'aime le sport, ___ je déteste le rugby. (but)|mais",
+  "Je suis resté à la maison ___ j'étais malade. (because)|parce que",
+  "Je voudrais aller au cinéma ___ au théâtre. (or)|ou",
+  "Il fait froid, ___ je mets un manteau. (so)|donc/alors",
+  "D'___, je me lève. Ensuite, je prends mon petit-déjeuner. (first)|abord",
+  "___ je serai grand, je serai médecin. (when)|quand/lorsque",
+  "Il est fatigué, ___ il continue à travailler. (yet / however)|pourtant/cependant",
+  "Nous avons mangé, ___ nous sommes sortis. (then)|puis/ensuite"],
+ extra:[
+  "Je t'aiderai ___ tu veux. (if)|si",
+  "___ je faisais mes devoirs, ma sœur regardait la télé. (while)|pendant que",
+  "Dépêche-toi, ___ tu seras en retard ! (otherwise)|sinon",
+  "Je préfère le tennis ; ___, mon frère préfère le foot. (on the other hand)|par contre/en revanche",
+  "Je ne sors pas, ___ je suis malade. (because – written style)|car"]},
+
+{id:"time", grp:"Pronouns & structures", title:"20. Time expressions",
+ ins:"Type the French time expression for the English in brackets.",
+ tip:"<b>Past:</b> hier, la semaine dernière, l'année dernière, il y a deux jours, autrefois. <b>Present:</b> maintenant, en ce moment, d'habitude, tous les jours. <b>Future:</b> demain, après-demain, la semaine prochaine, dans trois jours. <b>depuis</b> = for/since (still going on, + present tense), <b>pendant</b> = for (finished), <b>il y a</b> = ago, <b>venir de</b> + infinitive = to have just.",
+ main:[
+  "___ (yesterday), j'ai vu un film.|hier",
+  "Nous partons en vacances ___ (next week).|la semaine prochaine",
+  "Je suis allé à Paris ___ (last year).|l'année dernière",
+  "Elle est arrivée ___ (two days ago).|il y a deux jours",
+  "Il habite à Londres ___ trois ans. (for – he still lives there)|depuis",
+  "J'ai joué au foot ___ deux heures. (for – finished)|pendant",
+  "Je ___ finir mes devoirs. (have just)|viens de",
+  "___ (tomorrow), il va pleuvoir.|demain"],
+ extra:[
+  "D'___, je vais à l'école en bus. (usually)|habitude",
+  "___ (the day after tomorrow), nous serons à Rome.|après-demain",
+  "Je le vois ___. (every day)|tous les jours",
+  "Mes grands-parents habitaient ici ___. (in the past)|autrefois",
+  "Nous partirons ___. (in three days)|dans trois jours"]}
+];
+
+/* ============ ENGINE ============ */
+const $ = s => document.querySelector(s), app = $("#app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const KEY = "frGrammarLowerShell2";
+let S; try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+S = S || {name:"", cls:"", res:{}};
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const parse = q => { const i = q.lastIndexOf("|"); return {p:q.slice(0, i), g:q.slice(i + 1).split(";").map(x => x.split("/").map(y => y.trim()))}; };
+const norm = s => {
+  s = String(s).toLowerCase().replace(/[’‘`´]/g, "'").replace(/\s+/g, " ").replace(/[.!?]+$/, "").trim();
+  return CONFIG.STRICT_ACCENTS ? s : s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+};
+const isOk = (given, q) => q.g.every((alts, i) => alts.some(x => norm(x) === norm(given[i] || "")));
+
+function send(rec) {
+  if (!CONFIG.ENDPOINT) return;
+  fetch(CONFIG.ENDPOINT, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(rec)}).catch(() => {});
+}
+
+function login() {
+  app.innerHTML = `<div class="card"><h1>French GCSE Grammar</h1>
+  <p>Lower Shell revision. Work through the sections in any order. If you score below ${CONFIG.PASS}% in a section, you will be given extra exercises on that topic.</p>
+  <p><label>Name <input type="text" id="nm" autocomplete="name"></label></p>
+  <p><label>Class <input type="text" id="cl"></label></p>
+  <button onclick="start()">Start</button></div>`;
+}
+function start() {
+  const n = $("#nm").value.trim(), c = $("#cl").value.trim();
+  if (!n || !c) return alert("Please enter your name and class.");
+  S = {name:n, cls:c, res:{}}; save(); menu();
+}
+function signOut() {
+  if (confirm("Sign out on this device?")) { S = {name:"", cls:"", res:{}}; save(); login(); }
+}
+
+function stat(sec) {
+  const r = S.res[sec.id] || {};
+  if (!r.main) return {t:"Not started", c:"", btn:["Start", "main"]};
+  if (r.main.pct < CONFIG.PASS && !r.extra) return {t:`${r.main.pct}% – extra practice needed`, c:"bad", btn:["Extra practice", "extra"]};
+  return {t:`${r.main.pct}%` + (r.extra ? ` → extra practice ${r.extra.pct}%` : ""), c:r.main.pct >= CONFIG.PASS ? "ok" : "bad", btn:null};
+}
+function menu() {
+  const done = SECTIONS.filter(s => (S.res[s.id] || {}).main).length;
+  let last = "", html = "";
+  for (const s of SECTIONS) {
+    if (s.grp !== last) { html += `<h3>${s.grp}</h3>`; last = s.grp; }
+    const st = stat(s);
+    html += `<div class="card row"><div><b>${s.title}</b><br><span class="${st.c}">${st.t}</span></div>${st.btn ? `<button onclick="openSec('${s.id}','${st.btn[1]}')">${st.btn[0]}</button>` : ""}</div>`;
+  }
+  app.innerHTML = `<div class="row"><h1>${esc(S.name)} (${esc(S.cls)})</h1><button class="alt" onclick="signOut()">Sign out</button></div>
+  <p>${done} of ${SECTIONS.length} sections completed. Pass mark: ${CONFIG.PASS}%.</p>` + html + `<p><button class="alt" onclick="copyRes()">Copy my results</button></p>`;
+}
+function copyRes() {
+  const t = `${S.name} (${S.cls})\n` + SECTIONS.map(s => { const r = S.res[s.id] || {};
+    return `${s.title}: ${r.main ? r.main.pct + "%" : "-"}${r.extra ? " | extra " + r.extra.pct + "%" : ""}`; }).join("\n");
+  navigator.clipboard.writeText(t).then(() => alert("Copied – you can paste this into an email or message."), () => prompt("Copy this:", t));
+}
+
+function openSec(id, stage) {
+  const sec = SECTIONS.find(s => s.id === id), qs = sec[stage].map(parse);
+  app.innerHTML = `<div class="row"><h2>${sec.title}${stage === "extra" ? " – extra practice" : ""}</h2><button class="alt" onclick="menu()">Menu</button></div>
+  <div class="card"><details ${stage === "extra" ? "open" : ""}><summary>Reminder</summary><div class="tip">${sec.tip}</div></details>
+  <p>${sec.ins}</p>` +
+  qs.map((q, i) => { const parts = q.p.split("___"), sm = parts.length > 2 ? " sm" : "";
+    return `<div class="q">${i + 1}. ` + parts.map((t, j) => t + (j < parts.length - 1 ? `<input type="text" class="${sm}" id="a${i}_${j}" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">` : "")).join("") + `</div>`;
+  }).join("") + `<button onclick="submit('${id}','${stage}')">Submit</button></div>`;
+}
+
+function submit(id, stage) {
+  const sec = SECTIONS.find(s => s.id === id), qs = sec[stage].map(parse);
+  const ans = qs.map((q, i) => q.g.map((_, j) => $(`#a${i}_${j}`).value.trim()));
+  if (ans.some(a => a.some(x => !x)) && !confirm("Some gaps are empty. Submit anyway?")) return;
+  const good = qs.map((q, i) => isOk(ans[i], q));
+  const score = good.filter(Boolean).length, total = qs.length, pct = Math.round(100 * score / total), passed = 100 * score / total >= CONFIG.PASS;
+  (S.res[id] = S.res[id] || {})[stage] = {score, total, pct, passed}; save();
+  send({time:new Date().toISOString(), name:S.name, cls:S.cls, section:sec.title, stage, score, total, pct, passed,
+        answers:qs.map((q, i) => (good[i] ? "✓ " : "✗ ") + ans[i].join(" + ")).join(" | ")});
+  const need = stage === "main" && !passed;
+  app.innerHTML = `<div class="card"><h2>${sec.title}${stage === "extra" ? " – extra practice" : ""}</h2>
+  <h1 class="${passed ? "ok" : "bad"}">${score} / ${total} (${pct}%)</h1>
+  <p>${need ? `That is below ${CONFIG.PASS}%, so you now have some extra exercises on this topic. Read the corrections first.` : passed ? "Well done!" : "Keep revising this topic and ask your teacher if you are unsure."}</p>` +
+  qs.map((q, i) => { let k = 0;
+    const filled = q.p.replace(/___/g, () => `<b class="${good[i] ? "ok" : "bad"}">${esc(ans[i][k++]) || "–"}</b>`);
+    return `<div class="q">${i + 1}. ${filled} ${good[i] ? "✓" : `✗ → <b>${esc(q.g.map(a => a[0]).join(" + "))}</b>`}</div>`; }).join("") +
+  `<p>${need ? `<button onclick="openSec('${id}','extra')">Start extra practice</button> ` : ""}<button class="alt" onclick="menu()">Back to menu</button></p></div>`;
+}
+
+S.name ? menu() : login();
+</script>
+</body>
+</html>
